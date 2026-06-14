@@ -26,7 +26,6 @@ header {
   height:calc(100vh - 60px);
 }
 
-/* 메뉴 */
 .menu {
   width:260px;
   background:#1f2937;
@@ -43,7 +42,6 @@ header {
 }
 .menu div:hover { background:#374151; }
 
-/* 콘텐츠 */
 .content {
   flex:1;
   display:flex;
@@ -59,7 +57,17 @@ header {
   overflow:auto;
 }
 
-/* 버튼 */
+.block { margin-bottom:15px; }
+
+.label {
+  font-weight:bold;
+  margin-bottom:5px;
+}
+.topic { color:#2563eb; }
+.summary { color:#16a34a; }
+.background { color:#ca8a04; }
+.result { color:#dc2626; }
+
 .nav {
   position:fixed;
   bottom:10px;
@@ -90,8 +98,15 @@ button {
   <div class="menu" id="menu"></div>
 
   <div class="content">
-    <div class="card" id="left"></div>
-    <div class="card" id="right"></div>
+    <div class="card">
+      <h2 id="sourceTitle"></h2>
+      <p id="sourceText"></p>
+    </div>
+
+    <div class="card">
+      <h2 id="analysisTitle"></h2>
+      <div id="analysisBody"></div>
+    </div>
   </div>
 
 </div>
@@ -102,69 +117,106 @@ button {
 </div>
 
 <script>
-let data = [];
+
+/* 🔥 여기다가 35개 넣으면 끝 */
+const data = [
+{
+title:"병인양요",
+source:"프랑스 군대가 강화도를 공격하였다.",
+analysis:{
+topic:"프랑스 침략 저항",
+summary:"프랑스군에 대응",
+background:["천주교 탄압","프랑스 보복"],
+result:["척화비 건립","반외세 강화"]
+}
+},
+{
+title:"척화비",
+source:"서양과 싸우지 않으면 나라를 판다.",
+analysis:{
+topic:"외세 배척 정책",
+summary:"통상 거부",
+background:["양요","쇄국"],
+result:["반외세 강화","개항 지연"]
+}
+}
+];
+
 let current = 0;
 
-/* JSON 불러오기 */
-fetch("data.json")
-.then(res => res.json())
-.then(json => {
-    data = json;
-    buildMenu();
-    render();
-});
+function render() {
+  const item = data[current];
 
-/* 화면 */
-function render(){
-    const item = data[current];
+  document.getElementById('sourceTitle').textContent = item.title;
+  document.getElementById('analysisTitle').textContent = item.title;
 
-    document.getElementById("left").innerHTML =
-        "<h2>📜 " + item.title + "</h2><p>" + item.source + "</p>";
+  document.getElementById('sourceText').textContent = item.source;
 
-    document.getElementById("right").innerHTML =
-        "<h3>주제</h3>" + item.analysis.topic +
-        "<h3>요약</h3>" + item.analysis.summary +
-        "<h3>배경</h3>" + item.analysis.background.join("<br>") +
-        "<h3>결과</h3>" + item.analysis.result.join("<br>");
+  document.getElementById('analysisBody').innerHTML = `
+    <div class="block">
+      <div class="label topic">주제</div>
+      <div>${item.analysis.topic}</div>
+    </div>
 
-    document.getElementById("count").innerText =
-        (current+1) + " / " + data.length;
+    <div class="block">
+      <div class="label summary">요약</div>
+      <div>${item.analysis.summary}</div>
+    </div>
+
+    <div class="block">
+      <div class="label background">배경</div>
+      <ul>
+        ${item.analysis.background.map(v => `<li>${v}</li>`).join("")}
+      </ul>
+    </div>
+
+    <div class="block">
+      <div class="label result">결과</div>
+      <ul>
+        ${item.analysis.result.map(v => `<li>${v}</li>`).join("")}
+      </ul>
+    </div>
+  `;
+
+  document.getElementById('count').textContent =
+    (current + 1) + " / " + data.length;
 }
 
-/* 이동 */
 function next(){
-    if(current < data.length-1){
-        current++;
-        render();
-    }
+  if(current < data.length-1){
+    current++;
+    render();
+  }
 }
 function prev(){
-    if(current > 0){
-        current--;
-        render();
-    }
+  if(current > 0){
+    current--;
+    render();
+  }
 }
 
-/* 메뉴 */
-function buildMenu(){
-    const menu = document.getElementById("menu");
-    menu.innerHTML = "";
-
-    data.forEach((d,i)=>{
-        const div = document.createElement("div");
-        div.innerText = (i+1) + ". " + d.title;
-        div.onclick = ()=>{
-            current = i;
-            render();
-        };
-        menu.appendChild(div);
-    });
-}
-
-/* 메뉴 접기 */
 function toggleMenu(){
-    document.getElementById("menu").classList.toggle("hide");
+  document.getElementById("menu").classList.toggle("hide");
 }
+
+function buildMenu(){
+  const menu = document.getElementById("menu");
+  menu.innerHTML = "";
+
+  data.forEach((d,i)=>{
+    const div = document.createElement("div");
+    div.innerText = (i+1)+". "+d.title;
+    div.onclick = ()=>{
+      current = i;
+      render();
+    };
+    menu.appendChild(div);
+  });
+}
+
+buildMenu();
+render();
+
 </script>
 
 </body>
